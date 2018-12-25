@@ -1,0 +1,2 @@
+# sqlandplsql
+Practising oracle sql
