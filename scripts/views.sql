@@ -129,5 +129,130 @@ CREATE OR REPLACE FORCE VIEW emp_10_records
 SELECT * FROM EMP_10_RECORDS;
 
 /*
+READ ONLY VIEWS
+*/
+
+SELECT * FROM EMP;
+
+CREATE OR REPLACE FORCE VIEW emp_read_only
+    AS
+    SELECT * FROM EMP;
+    
+SELECT * FROM EMP_READ_ONLY;
+
+INSERT INTO EMP_READ_ONLY VALUES (1234,'TEST','TEST',null,SYSDATE, 1000, null, null);
+
+UPDATE EMP_READ_ONLY SET MGR=7934 WHERE EMPNO=1234;
+
+DELETE FROM EMP WHERE EMPNO = 1234;
+/*
+    READ ONLY VIEW UPDATE
+    ===============
+*/
+CREATE OR REPLACE FORCE VIEW emp_read_only
+    AS
+    SELECT * FROM EMP
+    WITH READ ONLY;
+    
+SELECT * FROM EMP_READ_ONLY;
+
+INSERT INTO EMP_READ_ONLY VALUES (1234,'TEST','TEST',null,SYSDATE, 1000, null, null);
+/*
+Result
+SQL Error: ORA-42399: cannot perform a DML operation on a read-only view
+*/
+
+UPDATE EMP_READ_ONLY SET COMM=100 WHERE EMPNO=7369;
+/*
+Result
+SQL Error: ORA-42399: cannot perform a DML operation on a read-only view
+*/
+
+DELETE FROM EMP_READ_ONLY WHERE EMPNO = 7369;
+/*
+Result
+SQL Error: ORA-42399: cannot perform a DML operation on a read-only view
+*/
+
+/*
+===============================================================================
+
+*/
+
+CREATE OR REPLACE VIEW emp_10_departments
+    AS
+    SELECT * FROM EMP WHERE DEPTNO = 10;
+    
+SELECT * FROM emp_10_departments;
+
+INSERT INTO emp_10_departments VALUES (1234,'TEST','TEST',null,SYSDATE, 1000, null, 10);
+
+INSERT INTO emp_10_departments VALUES (1235,'TEST1','TEST1',null,SYSDATE, 1000, null, 20);
+
+SELECT * FROM EMP;
+
+CREATE OR REPLACE VIEW emp_10_departments
+    AS
+    SELECT * FROM EMP WHERE DEPTNO = 10
+    WITH CHECK OPTION;
+    
+SELECT * FROM emp_10_departments;
+
+INSERT INTO emp_10_departments VALUES (1236,'TEST','TEST',null,SYSDATE, 1000, null, 10);
+
+INSERT INTO emp_10_departments VALUES (1237,'TEST','TEST',null,SYSDATE, 1000, null, 20);
+/*
+ORA-01402: view WITH CHECK OPTION where-clause violation
+*/
+
+UPDATE emp_10_departments SET MGR=1234 WHERE DEPTNO = 20;
+
+UPDATE emp_10_departments SET MGR=1234 WHERE EMPNO = 1235;
+
+UPDATE emp_10_departments SET MGR=1234 WHERE EMPNO = 1236;
+
+DELETE FROM emp_10_departments WHERE EMPNO = 1236;
+
+DELETE FROM emp_10_departments WHERE EMPNO = 1235;
+
+ROLLBACK;
+
+DELETE FROM EMP WHERE EMPNO IN (1234,1235);
+
+COMMIT;
+/*
 VIEWS ON MULTIPLE TABLES
 */
+
+SELECT * FROM EMP;
+
+SELECT * FROM DEPT;
+
+SELECT e.empno,e.ename,e.job,e.mgr,e.hiredate,e.sal,e.comm,e.deptno, d.dname,d.loc 
+      FROM EMP e, DEPT d WHERE e.deptno = d.deptno;
+      
+CREATE OR REPLACE FORCE VIEW emp_dept
+    AS
+    SELECT e.empno,e.ename,e.job,e.mgr,e.hiredate,e.sal,e.comm,e.deptno, d.dname,d.loc 
+      FROM EMP e, DEPT d WHERE e.deptno = d.deptno;
+
+SELECT * FROM emp_dept;
+
+INSERT INTO emp_dept VALUES (1237,'TEST','TEST',null,SYSDATE, 1000, null, 20,'accounting','new york');
+/*
+SQL Error: ORA-01776: cannot modify more than one base table through a join view
+
+*/
+
+INSERT INTO emp_dept VALUES (1237,'TEST','TEST',null,SYSDATE, 1000, null, 20);
+/*
+SQL Error: ORA-00947: not enough values
+
+*/
+
+INSERT INTO emp_dept(empno,ename,job,mgr,hiredate,sal,comm,deptno) VALUES (1237,'TEST','TEST',null,SYSDATE, 1000, null, 20);
+
+INSERT INTO emp_dept(deptno,dname,loc) VALUES (50,'test','test');
+
+SELECT * FROM USER_UPDATABLE_COLUMNS WHERE TABLE_NAME='EMP_DEPT';
+
