@@ -256,3 +256,5 @@ INSERT INTO emp_dept(deptno,dname,loc) VALUES (50,'test','test');
 
 SELECT * FROM USER_UPDATABLE_COLUMNS WHERE TABLE_NAME='EMP_DEPT';
 
+/*^TEst*/
+
