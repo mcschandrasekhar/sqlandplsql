@@ -256,5 +256,27 @@ INSERT INTO emp_dept(deptno,dname,loc) VALUES (50,'test','test');
 
 SELECT * FROM USER_UPDATABLE_COLUMNS WHERE TABLE_NAME='EMP_DEPT';
 
-/*^TEst*/
+/* 
+Aggregate functions and group by cluases in views
+MIN, MAX, SUM, AVG, COUNT
+*/
+
+SELECT deptno, SUM(sal) FROM EMP GROUP BY DEPTNO;
+
+SELECT  SUM(sal) FROM EMP;
+
+SELECT deptno,JOB FROM EMP GROUP BY JOB,deptno; 
+
+
+CREATE OR REPLACE FORCE VIEW sum_sal_deptno
+    AS
+    SELECT deptno, SUM(sal) as sal_sum FROM EMP GROUP BY DEPTNO;
+    
+show errors VIEW sum_sal_deptno;
+
+SELECT * FROM sum_sal_deptno;
+
+
+SELECT * FROM USER_UPDATABLE_COLUMNS WHERE TABLE_NAME=UPPER('sum_sal_deptno');
+
 
